@@ -6,7 +6,7 @@ const app: Application = express();
 
 // 3rd party middleware
 app.use(express.json());
-app.use(cors);
+app.use(cors());
 
 // Routes
 app.get("/", (req, res) => {

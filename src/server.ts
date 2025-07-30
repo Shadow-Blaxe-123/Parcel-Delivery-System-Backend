@@ -22,7 +22,7 @@ const startServer = async () => {
   try {
     console.log("Server is starting");
     server = app.listen(env.PORT, () => {
-      console.log("Server is running on port 3000");
+      console.log(`Server is running on ${env.PORT}`);
     });
     console.log("Server started");
     console.log("Connecting to database");
