@@ -28,6 +28,7 @@ function globalErrorHandler(
   res.status(statuscode).json({
     success: false,
     message,
+    statuscode,
     // errorSources,
     err: env.NODE_ENV === "development" ? err : null,
     stack: env.NODE_ENV === "development" ? err.stack : null,
