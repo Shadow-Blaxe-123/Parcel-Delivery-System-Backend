@@ -13,7 +13,7 @@ const userCreate = async (payload: IUser) => {
   }
 
   const user = await User.create(payload);
-  return user;
+  return user.toObject();
 };
 
 export const UserServices = {
