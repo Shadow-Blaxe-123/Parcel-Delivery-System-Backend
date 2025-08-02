@@ -7,7 +7,11 @@ const userSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     address: { type: String, required: true },
-    Role: { type: String, required: true, enum: Object.values(UserRole) },
+    role: {
+      type: String,
+      required: true,
+      enum: Object.values(UserRole),
+    },
     isBlocked: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
   },

@@ -6,7 +6,7 @@ const userCreateSchema = z.object({
   email: z.email(),
   password: z.string(),
   address: z.string(),
-  role: z.enum(UserRole),
+  role: z.enum([UserRole.RECEIVER, UserRole.SENDER]),
 });
 
 export const userCreateValidation = { userCreateSchema };

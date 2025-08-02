@@ -1,7 +1,7 @@
 export enum UserRole {
   ADMIN = "ADMIN",
   SENDER = "SENDER",
-  RECIEVER = "RECIEVER",
+  RECEIVER = "RECEIVER",
 }
 
 export interface IUser {
@@ -9,7 +9,7 @@ export interface IUser {
   email: string;
   password: string;
   address: string;
-  Role: UserRole;
+  role: UserRole;
   isBlocked?: boolean;
   isDeleted?: boolean;
 }
