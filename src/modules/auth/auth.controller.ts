@@ -7,7 +7,7 @@ import setAuthCookie from "../../utils/setAuthCookie";
 
 const login = catchPromise(async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  const tokens = await AuthServices.credsentialsLogin(email, password);
+  const tokens = await AuthServices.login(email, password);
   setAuthCookie(res, tokens);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -32,5 +32,15 @@ const logout = catchPromise(async (req: Request, res: Response) => {
     data: null,
   });
 });
+const resetPassword = catchPromise(async (req: Request, res: Response) => {
+  const { oldPassword, newPassword } = req.body;
+  await AuthServices.resetPassword(oldPassword, newPassword, req.user!.email);
 
-export const AuthController = { login, logout };
+  sendResponse(res, {
+    statusCode: StatusCodes.CREATED,
+    message: "Password changed successfully",
+    data: null,
+  });
+});
+
+export const AuthController = { login, logout, resetPassword };

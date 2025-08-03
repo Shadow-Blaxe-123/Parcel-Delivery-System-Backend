@@ -15,5 +15,31 @@ const loginSchema = z.object({
       error: "Password must contain at least 1 number.",
     }),
 });
+const resetPasswordSchema = z.object({
+  oldPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(/^(?=.*[A-Z])/, {
+      error: "Password must contain at least 1 uppercase letter.",
+    })
+    .regex(/^(?=.*[!@#$%^&*])/, {
+      error: "Password must contain at least 1 special character.",
+    })
+    .regex(/^(?=.*\d)/, {
+      error: "Password must contain at least 1 number.",
+    }),
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(/^(?=.*[A-Z])/, {
+      error: "Password must contain at least 1 uppercase letter.",
+    })
+    .regex(/^(?=.*[!@#$%^&*])/, {
+      error: "Password must contain at least 1 special character.",
+    })
+    .regex(/^(?=.*\d)/, {
+      error: "Password must contain at least 1 number.",
+    }),
+});
 
-export const authValidation = { loginSchema };
+export const authValidation = { loginSchema, resetPasswordSchema };

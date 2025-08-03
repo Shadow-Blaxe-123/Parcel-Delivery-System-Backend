@@ -4,7 +4,7 @@ import User from "../user/user.model";
 import { compare } from "bcryptjs";
 import { createUserTokens } from "../../utils/userTokens";
 
-const credsentialsLogin = async (email: string, password: string) => {
+const login = async (email: string, password: string) => {
   const user = await User.findOne({ email: email });
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, "User does not exist");
@@ -21,10 +21,23 @@ const credsentialsLogin = async (email: string, password: string) => {
     throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid password");
   }
   const tokens = createUserTokens(user);
-  // TODO: Set req.user = jwtPayload
   return tokens;
+};
+const resetPassword = async (
+  oldPassword: string,
+  newPassword: string,
+  email: string
+) => {
+  const user = await User.findOne({ email: email });
+  const isPasswordMatched = await compare(oldPassword, user!.password);
+  if (!isPasswordMatched) {
+    throw new AppError(StatusCodes.FORBIDDEN, "Wrong old password");
+  }
+  user!.password = newPassword; // will be hashed by pre("save") hook.
+  await user!.save();
 };
 
 export const AuthServices = {
-  credsentialsLogin,
+  login,
+  resetPassword,
 };
