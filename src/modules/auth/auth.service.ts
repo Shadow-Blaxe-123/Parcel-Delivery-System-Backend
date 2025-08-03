@@ -9,6 +9,12 @@ const credsentialsLogin = async (email: string, password: string) => {
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, "User does not exist");
   }
+  if (user.isBlocked || user.isDeleted) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "User has been blocked or deleted"
+    );
+  }
 
   const isPasswordMatched = await compare(password, user.password);
   if (!isPasswordMatched) {
