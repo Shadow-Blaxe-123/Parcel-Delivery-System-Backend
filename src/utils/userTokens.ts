@@ -2,7 +2,7 @@ import { sign, SignOptions } from "jsonwebtoken";
 import { IUser } from "../modules/user/user.interface";
 import { env } from "../config/env";
 
-export const createUserTokens = (user: Partial<IUser>) => {
+const createUserTokens = (user: Partial<IUser>) => {
   const jwtPauload = {
     userId: user._id,
     name: user.name,
@@ -18,3 +18,5 @@ export const createUserTokens = (user: Partial<IUser>) => {
   } as SignOptions);
   return { accessToken, refreshToken };
 };
+
+export const UserTokensUtility = { createUserTokens };

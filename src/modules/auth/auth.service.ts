@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import AppError from "../../utils/AppError";
 import User from "../user/user.model";
 import { compare } from "bcryptjs";
-import { createUserTokens } from "../../utils/userTokens";
+import { UserTokensUtility } from "../../utils/userTokens";
 
 const login = async (email: string, password: string) => {
   const user = await User.findOne({ email: email });
@@ -20,7 +20,7 @@ const login = async (email: string, password: string) => {
   if (!isPasswordMatched) {
     throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid password");
   }
-  const tokens = createUserTokens(user);
+  const tokens = UserTokensUtility.createUserTokens(user);
   return tokens;
 };
 const resetPassword = async (
