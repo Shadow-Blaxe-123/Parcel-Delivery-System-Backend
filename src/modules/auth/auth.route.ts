@@ -6,7 +6,7 @@ import checkAuth from "../../middleware/checkAuth";
 import { UserRole } from "../user/user.interface";
 
 const router = Router();
-
+// TODO: work on refresh token api
 router.post(
   "/login",
   validateRequest(authValidation.loginSchema),
