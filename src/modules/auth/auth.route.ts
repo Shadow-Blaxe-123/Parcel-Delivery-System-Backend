@@ -8,7 +8,8 @@ const router = Router();
 router.post(
   "/login",
   validateRequest(authValidation.loginSchema),
-  AuthController.credsentialsLogin
+  AuthController.login
 );
+router.post("/logout", AuthController.logout);
 
 export const AuthRoutes = router;

@@ -5,7 +5,7 @@ import sendResponse from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
 import setAuthCookie from "../../utils/setAuthCookie";
 
-const credsentialsLogin = catchPromise(async (req: Request, res: Response) => {
+const login = catchPromise(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const tokens = await AuthServices.credsentialsLogin(email, password);
   setAuthCookie(res, tokens);
@@ -15,5 +15,22 @@ const credsentialsLogin = catchPromise(async (req: Request, res: Response) => {
     data: tokens,
   });
 });
+const logout = catchPromise(async (req: Request, res: Response) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    message: "User logged out successfully",
+    data: null,
+  });
+});
 
-export const AuthController = { credsentialsLogin };
+export const AuthController = { login, logout };
