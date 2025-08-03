@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { env } from "../config/env";
-import AppError from "./AppError";
 import { StatusCodes } from "http-status-codes";
 import User from "../modules/user/user.model";
+import AppError from "../utils/AppError";
 
 const checkAuth =
   (...roles: string[]) =>
