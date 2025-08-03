@@ -15,6 +15,8 @@ const credsentialsLogin = async (email: string, password: string) => {
     throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid password");
   }
   const tokens = createUserTokens(user);
+  // TODO: SET COOKIES!!!
+  // TODO: Set req.user = jwtPayload
   return tokens;
 };
 
