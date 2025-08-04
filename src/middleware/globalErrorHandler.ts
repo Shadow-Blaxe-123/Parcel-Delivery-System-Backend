@@ -4,6 +4,7 @@ import AppError from "../utils/AppError";
 import { env } from "../config/env";
 import handleZodError from "../error/handleZodError";
 import { ErrorSources } from "../error/error.interface";
+import handleCastError from "../error/handleCastError";
 
 function globalErrorHandler(
   err: any,
@@ -24,6 +25,10 @@ function globalErrorHandler(
     statuscode = result.statusCode;
     message = result.message;
     errorSources = result.errorSources;
+  } else if (err.name === "CastError") {
+    const result = handleCastError();
+    statuscode = result.statusCode;
+    message = result.message;
   } else if (err instanceof AppError) {
     statuscode = err.statusCode;
     message = err.message;
