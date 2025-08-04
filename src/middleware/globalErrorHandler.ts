@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from "express";
-import AppError from "../utils/AppError";
+import AppError from "../error/AppError";
 import { env } from "../config/env";
 import handleZodError from "../error/handleZodError";
 import { ErrorSources } from "../error/error.interface";

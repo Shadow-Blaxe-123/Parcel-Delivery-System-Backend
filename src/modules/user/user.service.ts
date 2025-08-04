@@ -1,4 +1,4 @@
-import AppError from "../../utils/AppError";
+import AppError from "../../error/AppError";
 import { IUser, UserRole } from "./user.interface";
 import User from "./user.model";
 import httpStatus from "http-status-codes";

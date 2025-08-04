@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import AppError from "../../utils/AppError";
+import AppError from "../../error/AppError";
 import User from "../user/user.model";
 import { compare } from "bcryptjs";
 import { UserTokensUtility } from "../../utils/userTokens";

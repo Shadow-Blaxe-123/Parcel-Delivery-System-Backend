@@ -3,7 +3,7 @@ import { JwtPayload, verify } from "jsonwebtoken";
 import { env } from "../config/env";
 import { StatusCodes } from "http-status-codes";
 import User from "../modules/user/user.model";
-import AppError from "../utils/AppError";
+import AppError from "../error/AppError";
 
 const checkAuth =
   (...roles: string[]) =>

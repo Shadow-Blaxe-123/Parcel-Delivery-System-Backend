@@ -4,7 +4,7 @@ import { AuthServices } from "./auth.service";
 import sendResponse from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
 import setAuthCookie from "../../utils/setAuthCookie";
-import AppError from "../../utils/AppError";
+import AppError from "../../error/AppError";
 
 const login = catchPromise(async (req: Request, res: Response) => {
   const { email, password } = req.body;
