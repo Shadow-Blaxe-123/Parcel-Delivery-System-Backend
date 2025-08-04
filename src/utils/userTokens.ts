@@ -19,4 +19,18 @@ const createUserTokens = (user: Partial<IUser>) => {
   return { accessToken, refreshToken };
 };
 
-export const UserTokensUtility = { createUserTokens };
+const newAccessToken = (user: Partial<IUser>) => {
+  const jwtPauload = {
+    userId: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    address: user.address,
+  };
+  const accessToken = sign(jwtPauload, env.ACCESS_TOKEN_SECRET, {
+    expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
+  } as SignOptions);
+  return accessToken;
+};
+
+export const UserTokensUtility = { createUserTokens, newAccessToken };

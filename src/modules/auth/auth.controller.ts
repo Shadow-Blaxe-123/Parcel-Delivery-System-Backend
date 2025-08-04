@@ -4,6 +4,7 @@ import { AuthServices } from "./auth.service";
 import sendResponse from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
 import setAuthCookie from "../../utils/setAuthCookie";
+import AppError from "../../utils/AppError";
 
 const login = catchPromise(async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -42,5 +43,19 @@ const resetPassword = catchPromise(async (req: Request, res: Response) => {
     data: null,
   });
 });
+const newAccessToken = catchPromise(async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "No refresh token found");
+  }
+  const accessToken = await AuthServices.newAccessToken(refreshToken);
+  setAuthCookie(res, { accessToken });
 
-export const AuthController = { login, logout, resetPassword };
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    message: "New AccessToken retrieved successfully",
+    data: accessToken,
+  });
+});
+
+export const AuthController = { login, logout, resetPassword, newAccessToken };

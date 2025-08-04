@@ -3,6 +3,8 @@ import AppError from "../../utils/AppError";
 import User from "../user/user.model";
 import { compare } from "bcryptjs";
 import { UserTokensUtility } from "../../utils/userTokens";
+import { JwtPayload, verify } from "jsonwebtoken";
+import { env } from "../../config/env";
 
 const login = async (email: string, password: string) => {
   const user = await User.findOne({ email: email });
@@ -36,8 +38,28 @@ const resetPassword = async (
   user!.password = newPassword; // will be hashed by pre("save") hook.
   await user!.save();
 };
+const newAccessToken = async (refreshToken: string) => {
+  const verifiedToken = verify(
+    refreshToken,
+    env.REFRESH_TOKEN_SECRET
+  ) as JwtPayload;
+  const user = await User.findOne({ email: verifiedToken.email });
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+  if (user.isBlocked || user.isDeleted) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "User has been blocked or deleted"
+    );
+  }
+
+  const token = UserTokensUtility.newAccessToken(user);
+  return token;
+};
 
 export const AuthServices = {
   login,
   resetPassword,
+  newAccessToken,
 };
