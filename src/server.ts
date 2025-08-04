@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import app from "./app";
 import { env } from "./config/env";
 import { Server } from "http";
+import starterAdmin from "./utils/starterAdmin";
 
 let server: Server;
 
@@ -49,4 +50,5 @@ exitSignals.forEach(signalHandler);
 
 (async () => {
   await startServer();
+  await starterAdmin();
 })();
