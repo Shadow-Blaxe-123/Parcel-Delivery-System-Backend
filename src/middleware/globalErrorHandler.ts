@@ -5,6 +5,8 @@ import { env } from "../config/env";
 import handleZodError from "../error/handleZodError";
 import { ErrorSources } from "../error/error.interface";
 import handleCastError from "../error/handleCastError";
+import { handleDuplicateError } from "../error/handleDupicateError";
+import { handleValidationError } from "../error/handleValiadtionError";
 
 function globalErrorHandler(
   err: any,
@@ -19,17 +21,31 @@ function globalErrorHandler(
   if (env.NODE_ENV === "development") {
     console.log(err);
   }
-
+  // Zod
   if (err.name === "ZodError") {
     const result = handleZodError(err);
     statuscode = result.statusCode;
     message = result.message;
     errorSources = result.errorSources;
-  } else if (err.name === "CastError") {
+  }
+  // Mongoose
+  else if (err.name === "CastError") {
     const result = handleCastError();
     statuscode = result.statusCode;
     message = result.message;
-  } else if (err instanceof AppError) {
+  } else if (err.code === 11000) {
+    const result = handleDuplicateError(err);
+    statuscode = result.statusCode;
+    message = result.message;
+  } else if (err.name === "ValidationError") {
+    const result = handleValidationError(err);
+    statuscode = result.statusCode;
+    message = result.message;
+    errorSources = result.errorSources;
+  }
+
+  // App
+  else if (err instanceof AppError) {
     statuscode = err.statusCode;
     message = err.message;
   } else if (err instanceof Error) {
