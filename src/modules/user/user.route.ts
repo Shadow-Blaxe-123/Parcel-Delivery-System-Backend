@@ -25,4 +25,9 @@ router.delete(
   checkAuth(...Object.values(UserRole)),
   UserController.userDelete
 );
+router.get(
+  "/:id",
+  checkAuth(...Object.values(UserRole)),
+  UserController.getSingleUser
+);
 export const UserRoutes = router;

@@ -34,5 +34,20 @@ const userDelete = catchPromise(async (req: Request, res: Response) => {
     data: newUser,
   });
 });
+const getSingleUser = catchPromise(async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const decodedToken = req.user as JwtPayload;
+  const user = await UserServices.getSingleUser(id, decodedToken);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    message: "User retrieved successfully",
+    data: user,
+  });
+});
 
-export const UserController = { userCreate, userUpdate, userDelete };
+export const UserController = {
+  userCreate,
+  userUpdate,
+  userDelete,
+  getSingleUser,
+};

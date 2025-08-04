@@ -71,8 +71,26 @@ const deleteUser = async (id: string, decodedToken: JwtPayload) => {
   return null;
 };
 
+const getSingleUser = async (id: string, decodedToken: JwtPayload) => {
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  const isOwner = decodedToken.userId === id;
+  const isAdmin = decodedToken.role === UserRole.ADMIN;
+  if (!isOwner && !isAdmin) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You are not authorized to access this info."
+    );
+  }
+
+  return user.toObject();
+};
+
 export const UserServices = {
   userCreate,
   userUpdate,
   deleteUser,
+  getSingleUser,
 };
