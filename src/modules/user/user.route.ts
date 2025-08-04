@@ -2,6 +2,8 @@ import { Request, Response, Router } from "express";
 import { UserController } from "./user.controller";
 import validateRequest from "../../middleware/validateRequest";
 import { userValidation } from "./user.validation";
+import checkAuth from "../../middleware/checkAuth";
+import { UserRole } from "./user.interface";
 
 const router = Router();
 router.get("/", (req: Request, res: Response) => {
@@ -11,5 +13,11 @@ router.post(
   "/create",
   validateRequest(userValidation.userCreateSchema),
   UserController.userCreate
+);
+router.patch(
+  "/update/:id",
+  validateRequest(userValidation.userUpdateSchema),
+  checkAuth(...Object.values(UserRole)),
+  UserController.userUpdate
 );
 export const UserRoutes = router;

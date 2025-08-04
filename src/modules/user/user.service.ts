@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../error/AppError";
 import { IUser, UserRole } from "./user.interface";
 import User from "./user.model";
@@ -16,6 +17,48 @@ const userCreate = async (payload: IUser) => {
   return user.toObject();
 };
 
+const userUpdate = async (
+  id: string,
+  payload: Partial<IUser>,
+  decodedToken: JwtPayload
+) => {
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  if (payload.role) {
+    if (decodedToken.role !== UserRole.ADMIN) {
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        "You are not authorized to change roles"
+      );
+    }
+  }
+  if (payload.isBlocked || payload.isDeleted) {
+    if (decodedToken.role !== UserRole.ADMIN) {
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        "You are not authorized to change status"
+      );
+    }
+  }
+  if (payload.password) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You cannot update password. Use the reset password API."
+    );
+  }
+  const updatedUser = await User.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updatedUser) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Upadte failed");
+  }
+  return updatedUser.toObject();
+};
+
 export const UserServices = {
   userCreate,
+  userUpdate,
 };
