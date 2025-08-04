@@ -58,7 +58,23 @@ const userUpdate = async (
   return updatedUser.toObject();
 };
 
+const deleteUser = async (id: string, decodedToken: JwtPayload) => {
+  if (decodedToken.role !== UserRole.ADMIN) {
+    if (decodedToken.userId !== id) {
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        "You are not authorized to delete other users"
+      );
+    }
+    await User.findByIdAndUpdate(id, { isDeleted: true });
+    return null;
+  }
+  await User.findByIdAndDelete(id);
+  return null;
+};
+
 export const UserServices = {
   userCreate,
   userUpdate,
+  deleteUser,
 };
