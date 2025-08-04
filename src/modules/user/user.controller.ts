@@ -44,10 +44,21 @@ const getSingleUser = catchPromise(async (req: Request, res: Response) => {
     data: user,
   });
 });
+const getAllUser = catchPromise(async (req: Request, res: Response) => {
+  const query = req.query as Record<string, string>;
+  const decodedToken = req.user as JwtPayload;
+  const users = await UserServices.getAllUsers(query, decodedToken);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    message: "Users retrieved successfully",
+    data: users,
+  });
+});
 
 export const UserController = {
   userCreate,
   userUpdate,
   userDelete,
   getSingleUser,
+  getAllUser,
 };

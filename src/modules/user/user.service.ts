@@ -3,6 +3,8 @@ import AppError from "../../error/AppError";
 import { IUser, UserRole } from "./user.interface";
 import User from "./user.model";
 import httpStatus from "http-status-codes";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import { userSearchableFields } from "./user.constants";
 
 const userCreate = async (payload: IUser) => {
   const isExists = await User.findOne({ email: payload.email });
@@ -88,9 +90,39 @@ const getSingleUser = async (id: string, decodedToken: JwtPayload) => {
   return user.toObject();
 };
 
+const getAllUsers = async (
+  query: Record<string, string>,
+  decodedToken: JwtPayload
+) => {
+  if (decodedToken.role !== UserRole.ADMIN) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You are not authorized to access this info."
+    );
+  }
+  const queryBuilder = new QueryBuilder(query, User.find());
+  const users = queryBuilder
+    .search(userSearchableFields)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
+  // Making both promises execure in parallel.
+  const [data, meta] = await Promise.all([
+    users.build(),
+    queryBuilder.getMetaData(),
+  ]);
+
+  return {
+    meta: meta,
+    data: data,
+  };
+};
+
 export const UserServices = {
   userCreate,
   userUpdate,
   deleteUser,
   getSingleUser,
+  getAllUsers,
 };
