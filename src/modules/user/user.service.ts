@@ -66,10 +66,8 @@ const deleteUser = async (id: string, decodedToken: JwtPayload) => {
         "You are not authorized to delete other users"
       );
     }
-    await User.findByIdAndUpdate(id, { isDeleted: true });
-    return null;
   }
-  await User.findByIdAndDelete(id);
+  await User.findByIdAndUpdate(id, { isDeleted: true });
   return null;
 };
 
