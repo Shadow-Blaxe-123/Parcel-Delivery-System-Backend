@@ -1,7 +1,47 @@
+export enum ParcelTypes {
+  Document = "Document",
+  Box = "Box",
+  Fragile = "Fragile",
+  Electronics = "Electronics",
+  Clothing = "Clothing",
+  Perishable = "Perishable",
+  Other = "Other",
+}
+
+export enum ParcelStatus {
+  Requested = "Requested",
+  Approved = "Approved",
+  Dispatched = "Dispatched",
+  InTransit = "In Transit",
+  Delivered = "Delivered",
+  Cancelled = "Cancelled",
+}
+export interface StatusLog {
+  location: string;
+  timestamp: Date;
+  status: ParcelStatus;
+  notes?: string;
+  updatedBy: string;
+}
+
 export interface IParcel {
   _id?: string;
-  sender: string;
-  receiver: string;
-  address: string;
   weight: number;
+  deliveryDate: Date;
+  isBlocked: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  // Need extra logic
+  trackingId: string; // from pre save hook
+  senderId: string; // Req.Sender -> Service Layer -> Get Id from req.user -> Save
+  receiverId: string; // Req.ReceiverEmail -> Service Layer -> Fetch Id from DB -> Save
+  toAddress: string; // Fetch from DB in service
+  toPhone: string; // Fetch from DB in service
+  fromAddress: string; // Fetch from DB in service
+  fromPhone: string; // Fetch from DB in service
+  fee: number; // Calculated sendercut + (sendercut * 20%) + (weight * distance * 20tk)
+  // Enums
+  type: ParcelTypes;
+  status: ParcelStatus;
+  statusLogs: StatusLog[];
 }
