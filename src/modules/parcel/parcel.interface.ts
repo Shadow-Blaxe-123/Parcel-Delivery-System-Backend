@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export enum ParcelTypes {
   Document = "Document",
   Box = "Box",
@@ -16,16 +18,17 @@ export enum ParcelStatus {
   Delivered = "Delivered",
   Cancelled = "Cancelled",
 }
-export interface StatusLog {
+export interface ParcelStatusLog {
   location: string;
   timestamp: Date;
   status: ParcelStatus;
   notes?: string;
-  updatedBy: string;
+  updatedBy: Types.ObjectId;
 }
 
 export interface IParcel {
   _id?: string;
+  title: string;
   weight: number;
   deliveryDate: Date;
   isBlocked: boolean;
@@ -33,8 +36,8 @@ export interface IParcel {
   updatedAt?: Date;
   // Need extra logic
   trackingId: string; // from pre save hook
-  senderId: string; // Req.Sender -> Service Layer -> Get Id from req.user -> Save
-  receiverId: string; // Req.ReceiverEmail -> Service Layer -> Fetch Id from DB -> Save
+  senderId: Types.ObjectId; // Req.Sender -> Service Layer -> Get Id from req.user -> Save
+  receiverId: Types.ObjectId; // Req.ReceiverEmail -> Service Layer -> Fetch Id from DB -> Save
   toAddress: string; // Fetch from DB in service
   toPhone: string; // Fetch from DB in service
   fromAddress: string; // Fetch from DB in service
@@ -43,5 +46,5 @@ export interface IParcel {
   // Enums
   type: ParcelTypes;
   status: ParcelStatus;
-  statusLogs: StatusLog[];
+  statusLogs: ParcelStatusLog[];
 }
