@@ -32,6 +32,7 @@ export interface IParcel {
   weight: number;
   deliveryDate: Date;
   isBlocked: boolean;
+  isDeleted: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   // Need extra logic

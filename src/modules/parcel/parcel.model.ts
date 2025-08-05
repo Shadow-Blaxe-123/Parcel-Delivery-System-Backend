@@ -32,6 +32,7 @@ const ParcelSchema = new Schema<IParcel>(
     },
     type: { type: String, required: true, enum: Object.values(ParcelTypes) },
     isBlocked: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
     senderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     fromAddress: { type: String, required: true },
     fromPhone: { type: String, required: true },

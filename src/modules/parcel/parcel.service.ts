@@ -31,6 +31,7 @@ const createParcel = async (payload: ICreateParcel, senderId: string) => {
     toPhone: receiver.phone,
     fee: payload.fee + payload.weight * 200,
     isBlocked: false,
+    isDeleted: false,
     status: ParcelStatus.Requested,
     statusLogs: [
       {
@@ -45,4 +46,9 @@ const createParcel = async (payload: ICreateParcel, senderId: string) => {
   const parcel = await Parcel.create(finalPayload);
   return parcel.toObject();
 };
-export const ParcelServices = { createParcel };
+
+const deleteParcel = async (id: string) => {
+  await Parcel.findByIdAndUpdate(id, { isDeleted: true });
+  return null;
+};
+export const ParcelServices = { createParcel, deleteParcel };
