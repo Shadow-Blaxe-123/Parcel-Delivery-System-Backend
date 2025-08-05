@@ -46,4 +46,13 @@ const ParcelSchema = new Schema<IParcel>(
   }
 );
 
+ParcelSchema.pre("save", function (next) {
+  if (!this.trackingId) {
+    const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+    const randomPart = Math.floor(100000 + Math.random() * 900000); // 6-digit random number
+    this.trackingId = `TRK-${datePart}-${randomPart}`;
+  }
+  next();
+});
+
 export const Parcel = model<IParcel>("Parcel", ParcelSchema);
