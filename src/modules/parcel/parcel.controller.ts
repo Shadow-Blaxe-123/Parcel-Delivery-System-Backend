@@ -21,5 +21,14 @@ const createParcel = catchPromise(async (req: Request, res: Response) => {
     data: parcel,
   });
 });
+const deleteParcel = catchPromise(async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const parcel = await ParcelServices.deleteParcel(id);
+  sendResponse(res, {
+    statusCode: StatusCodes.CREATED,
+    message: "Parcel deleted successfully",
+    data: parcel,
+  });
+});
 
-export const ParcelController = { createParcel };
+export const ParcelController = { createParcel, deleteParcel };

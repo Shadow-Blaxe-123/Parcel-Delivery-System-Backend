@@ -13,5 +13,10 @@ router.post(
   checkAuth(UserRole.SENDER, UserRole.ADMIN),
   ParcelController.createParcel
 );
+router.delete(
+  "/delete/:id",
+  checkAuth(UserRole.ADMIN, UserRole.SENDER),
+  ParcelController.deleteParcel
+);
 
 export const ParcelRoutes = router;

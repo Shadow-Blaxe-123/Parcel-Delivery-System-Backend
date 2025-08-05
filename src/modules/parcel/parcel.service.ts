@@ -48,7 +48,11 @@ const createParcel = async (payload: ICreateParcel, senderId: string) => {
 };
 
 const deleteParcel = async (id: string) => {
-  await Parcel.findByIdAndUpdate(id, { isDeleted: true });
-  return null;
+  const result = await Parcel.findByIdAndUpdate(id, { isDeleted: true });
+  if (!result) {
+    throw new AppError(404, "Parcel not found");
+  }
+
+  return null; // or return result if you want to confirm deletion
 };
 export const ParcelServices = { createParcel, deleteParcel };
