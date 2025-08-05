@@ -35,7 +35,7 @@ export interface IParcel {
   createdAt?: Date;
   updatedAt?: Date;
   // Need extra logic
-  trackingId: string; // from pre save hook
+  trackingId?: string; // from pre save hook
   senderId: Types.ObjectId; // Req.Sender -> Service Layer -> Get Id from req.user -> Save
   receiverId: Types.ObjectId; // Req.ReceiverEmail -> Service Layer -> Fetch Id from DB -> Save
   toAddress: string; // Fetch from DB in service
@@ -47,4 +47,13 @@ export interface IParcel {
   type: ParcelTypes;
   status: ParcelStatus;
   statusLogs: ParcelStatusLog[];
+}
+export interface ICreateParcel {
+  title: string;
+  weight: number;
+  deliveryDate: Date;
+  // Need extra logic
+  receiverEmail: string;
+  fee: number;
+  type: ParcelTypes;
 }
