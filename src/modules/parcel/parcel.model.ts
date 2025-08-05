@@ -1,4 +1,4 @@
-import { CallbackError, model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 import {
   IParcel,
   ParcelStatus,
@@ -45,18 +45,5 @@ const ParcelSchema = new Schema<IParcel>(
     versionKey: false,
   }
 );
-
-ParcelSchema.pre("save", function (next) {
-  try {
-    if (!this.trackingId) {
-      const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
-      const randomPart = Math.floor(100000 + Math.random() * 900000); // 6-digit random number
-      this.trackingId = `TRK-${datePart}-${randomPart}`;
-    }
-    next();
-  } catch (error) {
-    next(error as CallbackError);
-  }
-});
 
 export const Parcel = model<IParcel>("Parcel", ParcelSchema);

@@ -8,7 +8,7 @@ const handleZodError = (error: ZodError): HandlerResponse => {
     const path = issue?.path[issue.path.length - 1];
     const message = issue?.message;
     errorSources.push({
-      path: path.toString(),
+      path: path?.toString(),
       message,
     });
   });

@@ -10,8 +10,19 @@ const createParcel = async (payload: ICreateParcel, senderId: string) => {
   if (!receiver) {
     throw new AppError(StatusCodes.NOT_FOUND, "Receiver not found");
   }
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+  const count = await Parcel.find({ senderId: senderId }).countDocuments();
+  const trackingId = `TRK-${datePart}-${count}`;
+
+  if (payload.deliveryDate < new Date()) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Delivery date cannot be in the past"
+    );
+  }
   const finalPayload: IParcel = {
     ...payload,
+    trackingId: trackingId,
     senderId: sender!._id,
     fromAddress: sender!.address,
     fromPhone: sender!.phone,
