@@ -30,5 +30,6 @@ const deleteParcel = catchPromise(async (req: Request, res: Response) => {
     data: parcel,
   });
 });
+// TODO: update parcel admin, check service
 
 export const ParcelController = { createParcel, deleteParcel };

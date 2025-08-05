@@ -9,6 +9,7 @@ const createUserTokens = (user: Partial<IUser>) => {
     email: user.email,
     role: user.role,
     address: user.address,
+    phone: user.phone,
   };
   const accessToken = sign(jwtPauload, env.ACCESS_TOKEN_SECRET, {
     expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,

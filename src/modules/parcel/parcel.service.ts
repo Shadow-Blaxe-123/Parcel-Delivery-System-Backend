@@ -3,15 +3,15 @@ import AppError from "../../error/AppError";
 import { ICreateParcel, IParcel, ParcelStatus } from "./parcel.interface";
 import User from "../user/user.model";
 import { Parcel } from "./parcel.model";
+import { JwtPayload } from "jsonwebtoken";
 
-const createParcel = async (payload: ICreateParcel, senderId: string) => {
-  const sender = await User.findById(senderId);
+const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   const receiver = await User.findOne({ email: payload.receiverEmail });
   if (!receiver) {
     throw new AppError(StatusCodes.NOT_FOUND, "Receiver not found");
   }
   const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
-  const count = await Parcel.find({ senderId: senderId }).countDocuments();
+  const count = await Parcel.find({ senderId: sender.userId }).countDocuments();
   const trackingId = `TRK-${datePart}-${count}`;
 
   if (payload.deliveryDate < new Date()) {
@@ -55,4 +55,45 @@ const deleteParcel = async (id: string) => {
 
   return null; // or return result if you want to confirm deletion
 };
-export const ParcelServices = { createParcel, deleteParcel };
+
+const admin = async (
+  id: string,
+  payload: Partial<IParcel>,
+  admin: JwtPayload
+) => {
+  const result = await Parcel.findById(id);
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Parcel not found");
+  }
+
+  const { isBlocked, isDeleted, status, statusLogs } = payload;
+
+  if (isBlocked !== undefined) {
+    result.isBlocked = isBlocked;
+  }
+  if (isDeleted !== undefined) {
+    result.isDeleted = isDeleted;
+  }
+  if (status) {
+    result.status = status;
+  }
+
+  if (statusLogs) {
+    const logsArray = Array.isArray(statusLogs) ? statusLogs : [statusLogs];
+    logsArray.forEach((log) => {
+      const logEntry = {
+        ...log,
+        updatedBy: admin._id,
+        timestamp: new Date(),
+        status: status || log.status, // fallback if status not passed in payload
+      };
+      result.statusLogs.push(logEntry);
+    });
+  }
+
+  await result.save();
+  return result;
+};
+
+const UpdateParcel = { admin };
+export const ParcelServices = { createParcel, deleteParcel, UpdateParcel };
