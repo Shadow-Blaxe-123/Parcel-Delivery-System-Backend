@@ -38,4 +38,10 @@ router.patch(
   validateRequest(ParcelValidation.updateSenderParcelSchema),
   ParcelController.updateParcelSender
 );
+
+router.get(
+  "/get/:trackingId",
+  checkAuth(...Object.values(UserRole)),
+  ParcelController.getSingleParcel
+);
 export const ParcelRoutes = router;

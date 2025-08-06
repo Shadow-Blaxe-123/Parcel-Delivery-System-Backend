@@ -6,6 +6,8 @@ import { StatusCodes } from "http-status-codes";
 import sendResponse from "../../utils/sendResponse";
 import { JwtPayload } from "jsonwebtoken";
 
+// ************************************* Create Parcel ******************************* //
+
 const createParcel = catchPromise(async (req: Request, res: Response) => {
   const payload = req.body;
   const sender = req.user;
@@ -22,6 +24,7 @@ const createParcel = catchPromise(async (req: Request, res: Response) => {
     data: parcel,
   });
 });
+// ************************************* Delete Parcel ******************************* //
 const deleteParcel = catchPromise(async (req: Request, res: Response) => {
   const id = req.params.id;
   const parcel = await ParcelServices.deleteParcel(id);
@@ -31,6 +34,7 @@ const deleteParcel = catchPromise(async (req: Request, res: Response) => {
     data: parcel,
   });
 });
+// ************************************* Update Parcel ******************************* //
 const updateParcelAdmin = catchPromise(async (req: Request, res: Response) => {
   const trackingId = req.params.trackingId;
   const payload = req.body;
@@ -91,10 +95,32 @@ const updateParcelSender = catchPromise(async (req: Request, res: Response) => {
   });
 });
 
+// ************************************* Get Parcel ******************************* //
+const getSingleParcel = catchPromise(async (req: Request, res: Response) => {
+  const trackingId = req.params.trackingId;
+  const decodedToken = req.user as JwtPayload;
+  if (!decodedToken) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      "Unauthorized access. Please login again."
+    );
+  }
+  const parcel = await ParcelServices.GetParcel.getSingleParcel(
+    trackingId,
+    decodedToken
+  );
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    message: "Parcel retrieved successfully",
+    data: parcel,
+  });
+});
+
 export const ParcelController = {
   createParcel,
   deleteParcel,
   updateParcelAdmin,
   updateParcelReceiver,
   updateParcelSender,
+  getSingleParcel,
 };

@@ -10,7 +10,8 @@ import User from "../user/user.model";
 import { Parcel } from "./parcel.model";
 import { JwtPayload } from "jsonwebtoken";
 import { generateTrackingId } from "../../utils/parcelTrackingId";
-
+import { UserRole } from "../user/user.interface";
+// ******************************* Create Parcel******************************* //
 const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   const receiver = await User.findOne({ email: payload.receiverEmail });
   if (!receiver) {
@@ -55,7 +56,7 @@ const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
 
   return populatedParcel.toObject();
 };
-
+// ******************************* Delete Parcel******************************* //
 const deleteParcel = async (id: string) => {
   const result = await Parcel.findByIdAndUpdate(id, { isDeleted: true });
   if (!result) {
@@ -64,6 +65,8 @@ const deleteParcel = async (id: string) => {
 
   return null; // or return result if you want to confirm deletion
 };
+
+// ******************************* Update Parcel******************************* //
 
 const admin = async (
   trackingId: string,
@@ -248,4 +251,35 @@ const sender = async (
 };
 
 const UpdateParcel = { admin, receiver, sender };
-export const ParcelServices = { createParcel, deleteParcel, UpdateParcel };
+
+// ******************************* Get Parcel ******************************* //
+
+const getSingleParcel = async (trackingId: string, user: JwtPayload) => {
+  const parcel = await Parcel.findOne({ trackingId });
+  if (!parcel) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Parcel does not exists");
+  }
+  if (
+    parcel.sender !== user.userId &&
+    parcel.receiver !== user.userId &&
+    user.role !== UserRole.ADMIN
+  ) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "You are not authorized to access this parcel!"
+    );
+  }
+  const populated = await parcel.populate(
+    "sender receiver statusLogs.updatedBy",
+    "-__v -password -email -isDeleted -isBlocked -createdAt -updatedAt"
+  );
+  return populated.toObject();
+};
+const GetParcel = { getSingleParcel };
+
+export const ParcelServices = {
+  createParcel,
+  deleteParcel,
+  UpdateParcel,
+  GetParcel,
+};
