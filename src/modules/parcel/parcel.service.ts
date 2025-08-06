@@ -183,7 +183,13 @@ const receiver = async (
 
   await result.save({ validateBeforeSave: true });
 
-  return result.toObject();
+  // ✅ Populate and remove sensitive data
+  const populated = await result.populate(
+    "sender receiver statusLogs.updatedBy",
+    "-__v -password -email -isDeleted -isBlocked -createdAt -updatedAt"
+  );
+
+  return populated.toObject();
 };
 
 const UpdateParcel = { admin, receiver };
