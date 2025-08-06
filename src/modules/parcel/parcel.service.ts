@@ -10,8 +10,6 @@ import User from "../user/user.model";
 import { Parcel } from "./parcel.model";
 import { JwtPayload } from "jsonwebtoken";
 import { generateTrackingId } from "../../utils/parcelTrackingId";
-import validateNoBlacklistedFields from "../../utils/updateBlackList.helper";
-import { senderUpdateBlacklistedFields } from "./parcel.constant";
 
 const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   const receiver = await User.findOne({ email: payload.receiverEmail });
@@ -77,8 +75,7 @@ const admin = async (
     throw new AppError(StatusCodes.NOT_FOUND, "Parcel not found");
   }
 
-  const { status, statusLog, isBlocked, isDeleted, fee, deliveryDate } =
-    payload;
+  const { status, statusLog, ...rest } = payload;
 
   if (!status) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Status is required");
@@ -89,10 +86,7 @@ const admin = async (
   }
 
   // ✅ Update optional fields if present
-  if (isBlocked !== undefined) result.isBlocked = isBlocked;
-  if (isDeleted !== undefined) result.isDeleted = isDeleted;
-  if (fee !== undefined) result.fee = fee;
-  if (deliveryDate !== undefined) result.deliveryDate = deliveryDate;
+  result.set(rest);
 
   // ✅ Check if already dispatched
   const wasDispatched = result.statusLogs.some(
@@ -220,7 +214,20 @@ const sender = async (
   }
 
   // Disallowed fields for sender
-  validateNoBlacklistedFields(payload, senderUpdateBlacklistedFields);
+  const blacklist = [
+    "status",
+    "isBlocked",
+    "isDeleted",
+    "statusLogs",
+    "trackingId",
+  ];
+  const invalid = Object.keys(payload).filter((key) => blacklist.includes(key));
+  if (invalid.length > 0) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `Blacklisted fields: ${invalid.join(", ")}`
+    );
+  }
 
   // Update
   result.set(payload);
