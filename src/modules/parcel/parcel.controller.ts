@@ -69,10 +69,32 @@ const updateParcelReceiver = catchPromise(
     });
   }
 );
+const updateParcelSender = catchPromise(async (req: Request, res: Response) => {
+  const trackingId = req.params.trackingId;
+  const payload = req.body;
+  const decodedToken = req.user as JwtPayload;
+  if (!decodedToken) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      "Unauthorized access. Please login again."
+    );
+  }
+  const result = await ParcelServices.UpdateParcel.sender(
+    trackingId,
+    payload,
+    decodedToken
+  );
+  sendResponse(res, {
+    statusCode: StatusCodes.CREATED,
+    message: "Parcel updated successfully",
+    data: result,
+  });
+});
 
 export const ParcelController = {
   createParcel,
   deleteParcel,
   updateParcelAdmin,
   updateParcelReceiver,
+  updateParcelSender,
 };

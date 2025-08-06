@@ -189,7 +189,7 @@ const receiver = async (
 };
 const sender = async (
   trackingId: string,
-  payload: JwtPayload,
+  payload: Partial<ICreateParcel>,
   sender: JwtPayload
 ) => {
   const result = await Parcel.findOne({ trackingId });
@@ -212,21 +212,16 @@ const sender = async (
   if (wasDispatched) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Parcel already dispatched!");
   }
-
-  // Disallowed fields for sender
-  const blacklist = [
-    "status",
-    "isBlocked",
-    "isDeleted",
-    "statusLogs",
-    "trackingId",
-  ];
-  const invalid = Object.keys(payload).filter((key) => blacklist.includes(key));
-  if (invalid.length > 0) {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      `Blacklisted fields: ${invalid.join(", ")}`
-    );
+  if (payload.receiverEmail) {
+    const receiver = await User.findOne({ email: payload.receiverEmail });
+    if (!receiver) {
+      throw new AppError(
+        StatusCodes.NOT_FOUND,
+        "Receiver not found, cannot update parcel"
+      );
+    }
+    payload.receiver = receiver._id;
+    delete payload.receiverEmail;
   }
 
   // Update

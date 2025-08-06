@@ -59,4 +59,5 @@ export interface ICreateParcel {
   receiverEmail: string;
   fee: number;
   type: ParcelTypes;
+  receiver?: Types.ObjectId;
 }
