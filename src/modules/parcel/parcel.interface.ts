@@ -39,8 +39,8 @@ export interface IParcel {
   updatedAt?: Date;
   // Need extra logic
   trackingId?: string; // from pre save hook
-  senderId: Types.ObjectId; // Req.Sender -> Service Layer -> Get Id from req.user -> Save
-  receiverId: Types.ObjectId; // Req.ReceiverEmail -> Service Layer -> Fetch Id from DB -> Save
+  sender: Types.ObjectId; // Req.Sender -> Service Layer -> Get Id from req.user -> Save
+  receiver: Types.ObjectId; // Req.ReceiverEmail -> Service Layer -> Fetch Id from DB -> Save
   toAddress: string; // Fetch from DB in service
   toPhone: string; // Fetch from DB in service
   fromAddress: string; // Fetch from DB in service

@@ -9,8 +9,8 @@ const router = Router();
 
 router.post(
   "/create",
-  validateRequest(ParcelValidation.createParcelSchema),
   checkAuth(UserRole.SENDER, UserRole.ADMIN),
+  validateRequest(ParcelValidation.createParcelSchema),
   ParcelController.createParcel
 );
 router.delete(
@@ -21,7 +21,7 @@ router.delete(
 
 // ******************************************* The Updates ******************************************* //
 router.patch(
-  "/update/admin/:id",
+  "/update/admin/:trackingId",
   checkAuth(UserRole.ADMIN),
   validateRequest(ParcelValidation.updateAdminParcelSchema),
   ParcelController.updateParcelAdmin

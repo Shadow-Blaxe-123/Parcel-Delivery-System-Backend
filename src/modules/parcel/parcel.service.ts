@@ -11,8 +11,7 @@ const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Receiver not found");
   }
   const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
-  const count = await Parcel.find({ senderId: sender.userId }).countDocuments();
-  const trackingId = `TRK-${datePart}-${count}`;
+  const trackingId = `TRK-${datePart}-${sender.userId}`;
 
   if (payload.deliveryDate < new Date()) {
     throw new AppError(
@@ -23,10 +22,10 @@ const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   const finalPayload: IParcel = {
     ...payload,
     trackingId: trackingId,
-    senderId: sender!._id,
+    sender: sender!.userId,
     fromAddress: sender!.address,
     fromPhone: sender!.phone,
-    receiverId: receiver._id,
+    receiver: receiver._id,
     toAddress: receiver.address,
     toPhone: receiver.phone,
     fee: payload.fee + payload.weight * 200,
@@ -38,13 +37,19 @@ const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
         location: sender!.address,
         timestamp: new Date(),
         status: ParcelStatus.Requested,
-        updatedBy: sender!._id,
+        updatedBy: sender!.userId,
         notes: "Parcel requested by sender",
       },
     ],
   };
+  console.log(finalPayload);
   const parcel = await Parcel.create(finalPayload);
-  return parcel.toObject();
+  const populatedParcel = await parcel.populate(
+    "sender receiver",
+    "-password -__v -_id"
+  );
+
+  return populatedParcel.toObject();
 };
 
 const deleteParcel = async (id: string) => {
@@ -56,8 +61,12 @@ const deleteParcel = async (id: string) => {
   return null; // or return result if you want to confirm deletion
 };
 
-const admin = async (id: string, payload: JwtPayload, admin: JwtPayload) => {
-  const result = await Parcel.findById(id);
+const admin = async (
+  trackingId: string,
+  payload: JwtPayload,
+  admin: JwtPayload
+) => {
+  const result = await Parcel.findOne({ trackingId });
   if (!result) {
     throw new AppError(StatusCodes.NOT_FOUND, "Parcel not found");
   }
@@ -72,43 +81,55 @@ const admin = async (id: string, payload: JwtPayload, admin: JwtPayload) => {
     throw new AppError(StatusCodes.BAD_REQUEST, "Status log is required");
   }
 
-  if (isBlocked !== undefined) {
-    result.isBlocked = isBlocked;
-  }
-  if (isDeleted !== undefined) {
-    result.isDeleted = isDeleted;
-  }
-  if (fee !== undefined) {
-    result.fee = fee;
+  // ✅ Update optional fields if present
+  if (isBlocked !== undefined) result.isBlocked = isBlocked;
+  if (isDeleted !== undefined) result.isDeleted = isDeleted;
+  if (fee !== undefined) result.fee = fee;
+
+  // ✅ Check if already dispatched
+  const wasDispatched = result.statusLogs.some(
+    (log) => log.status === ParcelStatus.Dispatched
+  );
+
+  if (wasDispatched) {
+    if (status === ParcelStatus.Cancelled) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        "Parcel already dispatched, cannot be cancelled"
+      );
+    }
+
+    if (
+      status !== ParcelStatus.InTransit &&
+      status !== ParcelStatus.Delivered
+    ) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        `Parcel already dispatched, status cannot be changed to ${status}`
+      );
+    }
   }
 
-  // const logsArray = Array.isArray(statusLogs) ? statusLogs : [statusLogs];
-  // logsArray.forEach((log) => {
-  //   const logEntry = {
-  //     ...log,
-  //     updatedBy: admin._id,
-  //     timestamp: new Date(),
-  //     status: status || log.status,
-  //   };
-  //   result.statusLogs.push(logEntry);
-  // });
-
+  // ✅ Create new status log entry
   const logEntry = {
     ...statusLog,
     updatedBy: admin.userId,
     timestamp: new Date(),
-    status: status,
+    status,
   };
   result.statusLogs.push(logEntry);
 
-  // ✅ Set new status
   result.status = status;
 
   await result.save();
-  return result.populate(
-    "senderId receiverId statusLogs.updatedBy",
-    "-__v -password -_id -email -createdAt -updatedAt -isDeleted -isBlocked"
+
+  // ✅ Populate and remove sensitive data
+  const populated = await result.populate(
+    "sender receiver statusLogs.updatedBy",
+    "-__v -password -email -isDeleted -isBlocked -createdAt -updatedAt"
   );
+
+  return populated.toObject();
 };
 
 const UpdateParcel = { admin };

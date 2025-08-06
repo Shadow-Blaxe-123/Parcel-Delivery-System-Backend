@@ -15,7 +15,7 @@ const createParcel = catchPromise(async (req: Request, res: Response) => {
       "Unauthorized access. Please login again."
     );
   }
-  const parcel = await ParcelServices.createParcel(payload, sender.userId);
+  const parcel = await ParcelServices.createParcel(payload, sender);
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,
     message: "Parcel created successfully",
@@ -32,11 +32,11 @@ const deleteParcel = catchPromise(async (req: Request, res: Response) => {
   });
 });
 const updateParcelAdmin = catchPromise(async (req: Request, res: Response) => {
-  const id = req.params.id;
+  const trackingId = req.params.trackingId;
   const payload = req.body;
   const decodedToken = req.user as JwtPayload;
   const result = await ParcelServices.UpdateParcel.admin(
-    id,
+    trackingId,
     payload,
     decodedToken
   );
