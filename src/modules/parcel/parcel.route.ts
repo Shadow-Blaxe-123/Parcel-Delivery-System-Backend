@@ -26,4 +26,10 @@ router.patch(
   validateRequest(ParcelValidation.updateAdminParcelSchema),
   ParcelController.updateParcelAdmin
 );
+router.patch(
+  "/update/receiver/:trackingId",
+  checkAuth(UserRole.RECEIVER),
+  validateRequest(ParcelValidation.updateReceiverParcelSchema),
+  ParcelController.updateParcelReceiver
+);
 export const ParcelRoutes = router;

@@ -24,9 +24,17 @@ const updateAdminParcelSchema = z.object({
   fee: z.number("Fee is must be a number").optional(),
   isBlocked: z.boolean().optional(),
   isDeleted: z.boolean().optional(),
+  deliveryDate: z
+    .union([z.string(), z.date()])
+    .transform((val) => new Date(val))
+    .optional(),
+});
+const updateReceiverParcelSchema = z.object({
+  status: z.enum([ParcelStatus.Delivered, ParcelStatus.Cancelled]),
 });
 
 export const ParcelValidation = {
   createParcelSchema,
   updateAdminParcelSchema,
+  updateReceiverParcelSchema,
 };

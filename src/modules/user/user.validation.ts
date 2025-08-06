@@ -7,6 +7,7 @@ const userCreateSchema = z.object({
     .min(3, "Name must be at least 3 characters long")
     .max(50, "Name must be at most 50 characters long"),
   email: z.email(),
+  phone: z.string().min(11, "Phone number must be at least 10 characters long"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters long")
@@ -30,6 +31,10 @@ const userUpdateSchema = z
       .max(50, "Name must be at most 50 characters long")
       .optional(),
     email: z.email().optional(),
+    phone: z
+      .string()
+      .min(11, "Phone number must be at least 10 characters long")
+      .optional(),
     address: z.string().optional(),
     role: z.enum([UserRole.RECEIVER, UserRole.SENDER]).optional(),
     password: z.string().optional(),

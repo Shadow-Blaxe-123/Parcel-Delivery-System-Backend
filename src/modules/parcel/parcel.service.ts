@@ -1,6 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../error/AppError";
-import { ICreateParcel, IParcel, ParcelStatus } from "./parcel.interface";
+import {
+  ICreateParcel,
+  IParcel,
+  ParcelStatus,
+  ParcelStatusLog,
+} from "./parcel.interface";
 import User from "../user/user.model";
 import { Parcel } from "./parcel.model";
 import { JwtPayload } from "jsonwebtoken";
@@ -11,10 +16,7 @@ const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   if (!receiver) {
     throw new AppError(StatusCodes.NOT_FOUND, "Receiver not found");
   }
-  // const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
-  // const trackingId = `TRK-${datePart}-${sender.userId}`;
-
-  const trackingId = generateTrackingId(sender.email);
+  const trackingId = generateTrackingId(receiver.email);
 
   if (payload.deliveryDate < new Date()) {
     throw new AppError(
@@ -45,7 +47,6 @@ const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
       },
     ],
   };
-  console.log(finalPayload);
   const parcel = await Parcel.create(finalPayload);
   const populatedParcel = await parcel.populate(
     "sender receiver",
@@ -74,7 +75,8 @@ const admin = async (
     throw new AppError(StatusCodes.NOT_FOUND, "Parcel not found");
   }
 
-  const { status, statusLog, isBlocked, isDeleted, fee } = payload;
+  const { status, statusLog, isBlocked, isDeleted, fee, deliveryDate } =
+    payload;
 
   if (!status) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Status is required");
@@ -88,6 +90,7 @@ const admin = async (
   if (isBlocked !== undefined) result.isBlocked = isBlocked;
   if (isDeleted !== undefined) result.isDeleted = isDeleted;
   if (fee !== undefined) result.fee = fee;
+  if (deliveryDate !== undefined) result.deliveryDate = deliveryDate;
 
   // ✅ Check if already dispatched
   const wasDispatched = result.statusLogs.some(
@@ -135,5 +138,53 @@ const admin = async (
   return populated.toObject();
 };
 
-const UpdateParcel = { admin };
+const receiver = async (
+  trackingId: string,
+  status: ParcelStatus.Cancelled | ParcelStatus.Delivered,
+  receiver: JwtPayload
+) => {
+  const result = await Parcel.findOne({ trackingId });
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Parcel not found");
+  }
+  if (result.receiver.toString() !== receiver.userId) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "You are not authorized to access this parcel!"
+    );
+  }
+  const wasDispatched = result.statusLogs.some(
+    (log) => log.status === ParcelStatus.Dispatched
+  );
+  if (status === ParcelStatus.Cancelled && wasDispatched) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Parcel already dispatched!");
+  }
+  if (status === ParcelStatus.Delivered && !wasDispatched) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Parcel has not been dispatched yet!"
+    );
+  }
+
+  result.status = status;
+
+  const logEntry: ParcelStatusLog = {
+    status: status,
+    updatedBy: receiver.userId,
+    location: receiver.address,
+    timestamp: new Date(),
+    notes:
+      status === ParcelStatus.Delivered
+        ? "Parcel delivered to receiver"
+        : "Parcel cancelled by receiver",
+  };
+
+  result.statusLogs.push(logEntry);
+
+  await result.save({ validateBeforeSave: true });
+
+  return result.toObject();
+};
+
+const UpdateParcel = { admin, receiver };
 export const ParcelServices = { createParcel, deleteParcel, UpdateParcel };
