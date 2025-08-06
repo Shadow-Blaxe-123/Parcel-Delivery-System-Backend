@@ -50,7 +50,7 @@ const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   const parcel = await Parcel.create(finalPayload);
   const populatedParcel = await parcel.populate(
     "sender receiver",
-    "-password -__v -_id"
+    "-password -__v -_id -createdAt -updatedAt -isBlocked -isDeleted"
   );
 
   return populatedParcel.toObject();

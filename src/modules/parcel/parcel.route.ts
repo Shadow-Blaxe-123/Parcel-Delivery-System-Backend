@@ -32,4 +32,10 @@ router.patch(
   validateRequest(ParcelValidation.updateReceiverParcelSchema),
   ParcelController.updateParcelReceiver
 );
+router.patch(
+  "/update/sender/:trackingId",
+  checkAuth(UserRole.SENDER),
+  validateRequest(ParcelValidation.updateSenderParcelSchema),
+  ParcelController.updateParcelSender
+);
 export const ParcelRoutes = router;

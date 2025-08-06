@@ -36,14 +36,16 @@ const updateSenderParcelSchema = z.object({
   title: z
     .string("Title is must be a string")
     .min(3, "Title must be at least 3 characters long")
-    .max(50, "Title must be at most 50 characters long"),
-  weight: z.number("Weight is must be a number"),
+    .max(50, "Title must be at most 50 characters long")
+    .optional(),
+  weight: z.number("Weight is must be a number").optional(),
   deliveryDate: z
     .union([z.string(), z.date()])
-    .transform((val) => new Date(val)),
-  receiverEmail: z.email(),
-  fee: z.number("Fee is must be a number"),
-  type: z.enum(Object.values(ParcelTypes)),
+    .transform((val) => new Date(val))
+    .optional(),
+  receiverEmail: z.email().optional(),
+  fee: z.number("Fee is must be a number").optional(),
+  type: z.enum(Object.values(ParcelTypes)).optional(),
 });
 
 export const ParcelValidation = {
