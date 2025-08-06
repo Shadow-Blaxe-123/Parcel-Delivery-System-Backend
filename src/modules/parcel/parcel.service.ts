@@ -10,6 +10,8 @@ import User from "../user/user.model";
 import { Parcel } from "./parcel.model";
 import { JwtPayload } from "jsonwebtoken";
 import { generateTrackingId } from "../../utils/parcelTrackingId";
+import validateNoBlacklistedFields from "../../utils/updateBlackList.helper";
+import { senderUpdateBlacklistedFields } from "./parcel.constant";
 
 const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   const receiver = await User.findOne({ email: payload.receiverEmail });
@@ -218,17 +220,10 @@ const sender = async (
   }
 
   // Disallowed fields for sender
-  const blacklistedFields = ["status", "isBlocked", "isDeleted", "statusLogs"];
-  const invalidFields = Object.keys(payload).filter((key) =>
-    blacklistedFields.includes(key)
-  );
+  validateNoBlacklistedFields(payload, senderUpdateBlacklistedFields);
 
-  if (invalidFields.length > 0) {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      `You cannot update these fields: ${invalidFields.join(", ")}`
-    );
-  }
+  // Update
+  result.set(payload);
 
   // Add update log entry
   const logEntry: ParcelStatusLog = {
@@ -242,17 +237,7 @@ const sender = async (
   result.statusLogs.push(logEntry);
   await result.save({ validateBeforeSave: true });
 
-  // Apply the updates
-  const updatedParcel = await Parcel.findOneAndUpdate({ trackingId }, payload, {
-    runValidators: true,
-    new: true,
-  });
-
-  if (!updatedParcel) {
-    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, "Update failed");
-  }
-
-  const populated = await updatedParcel.populate(
+  const populated = await result.populate(
     "sender receiver statusLogs.updatedBy",
     "-__v -password -email -isDeleted -isBlocked -createdAt -updatedAt"
   );
