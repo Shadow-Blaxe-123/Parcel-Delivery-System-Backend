@@ -18,6 +18,7 @@ interface Env {
   ADMIN_EMAIL: string;
   ADMIN_PASSWORD: string;
   ADMIN_ADDRESS: string;
+  ADMIN_PHONE: string;
 }
 
 function loadEnv(): Env {
@@ -34,6 +35,7 @@ function loadEnv(): Env {
     "ADMIN_EMAIL",
     "ADMIN_PASSWORD",
     "ADMIN_ADDRESS",
+    "ADMIN_PHONE",
   ];
   requiredVariables.forEach((variable) => {
     if (!process.env[variable]) {
@@ -56,6 +58,7 @@ function loadEnv(): Env {
     ADMIN_EMAIL: process.env.ADMIN_EMAIL as string,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD as string,
     ADMIN_ADDRESS: process.env.ADMIN_ADDRESS as string,
+    ADMIN_PHONE: process.env.ADMIN_PHONE as string,
   };
 }
 

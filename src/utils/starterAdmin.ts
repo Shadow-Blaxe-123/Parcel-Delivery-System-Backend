@@ -16,7 +16,7 @@ const starterAdmin = async () => {
       password: env.ADMIN_PASSWORD,
       address: env.ADMIN_ADDRESS,
       role: UserRole.ADMIN,
-      phone: "1234567890",
+      phone: env.ADMIN_PHONE,
     };
     const user = await User.create(admin);
     console.log("Starter Admin created");
