@@ -107,7 +107,7 @@ const getAllUsers = async (
     .sort()
     .fields()
     .paginate();
-  // Making both promises execure in parallel.
+  // Making both promises execute in parallel.
   const [data, meta] = await Promise.all([
     users.build(),
     queryBuilder.getMetaData(),

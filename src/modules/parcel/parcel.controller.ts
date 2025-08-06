@@ -115,6 +115,27 @@ const getSingleParcel = catchPromise(async (req: Request, res: Response) => {
     data: parcel,
   });
 });
+const getAllParcel = catchPromise(async (req: Request, res: Response) => {
+  const query = req.query as Record<string, string>;
+
+  const decodedToken = req.user as JwtPayload;
+  if (!decodedToken) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      "Unauthorized access. Please login again."
+    );
+  }
+  const parcels = await ParcelServices.GetParcel.getAllParcels(
+    query,
+    decodedToken
+  );
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    message: "Parcel retrieved successfully",
+    data: parcels.data,
+    meta: parcels.meta,
+  });
+});
 
 export const ParcelController = {
   createParcel,
@@ -123,4 +144,5 @@ export const ParcelController = {
   updateParcelReceiver,
   updateParcelSender,
   getSingleParcel,
+  getAllParcel,
 };

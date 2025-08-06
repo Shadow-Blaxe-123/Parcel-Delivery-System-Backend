@@ -11,6 +11,9 @@ import { Parcel } from "./parcel.model";
 import { JwtPayload } from "jsonwebtoken";
 import { generateTrackingId } from "../../utils/parcelTrackingId";
 import { UserRole } from "../user/user.interface";
+import { parcelSearchableFields } from "./parcel.constants";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import { calculateFee } from "../../utils/calculateFee";
 // ******************************* Create Parcel******************************* //
 const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   const receiver = await User.findOne({ email: payload.receiverEmail });
@@ -34,7 +37,7 @@ const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
     receiver: receiver._id,
     toAddress: receiver.address,
     toPhone: receiver.phone,
-    fee: payload.fee + payload.weight * 200,
+    fee: calculateFee(payload.fee),
     isBlocked: false,
     isDeleted: false,
     status: ParcelStatus.Requested,
@@ -226,6 +229,9 @@ const sender = async (
     payload.receiver = receiver._id;
     delete payload.receiverEmail;
   }
+  if (payload.fee) {
+    payload.fee = Number(calculateFee(payload.fee));
+  }
 
   // Update
   result.set(payload);
@@ -250,8 +256,6 @@ const sender = async (
   return populated.toObject();
 };
 
-const UpdateParcel = { admin, receiver, sender };
-
 // ******************************* Get Parcel ******************************* //
 
 const getSingleParcel = async (trackingId: string, user: JwtPayload) => {
@@ -275,7 +279,38 @@ const getSingleParcel = async (trackingId: string, user: JwtPayload) => {
   );
   return populated.toObject();
 };
-const GetParcel = { getSingleParcel };
+
+const getAllParcels = async (
+  query: Record<string, string>,
+  decodedToken: JwtPayload
+) => {
+  if (decodedToken.role !== UserRole.ADMIN) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "You are not authorized to access this info."
+    );
+  }
+  const queryBuilder = new QueryBuilder(query, Parcel.find());
+  const parcels = queryBuilder
+    .search(parcelSearchableFields)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
+  // Making both promises execute in parallel.
+  const [data, meta] = await Promise.all([
+    parcels.build(),
+    queryBuilder.getMetaData(),
+  ]);
+
+  return {
+    meta: meta,
+    data: data,
+  };
+};
+
+const GetParcel = { getSingleParcel, getAllParcels };
+const UpdateParcel = { admin, receiver, sender };
 
 export const ParcelServices = {
   createParcel,

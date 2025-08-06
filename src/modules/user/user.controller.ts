@@ -51,7 +51,8 @@ const getAllUser = catchPromise(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     message: "Users retrieved successfully",
-    data: users,
+    data: users.data,
+    meta: users.meta,
   });
 });
 

@@ -8,7 +8,15 @@ export class QueryBuilder<T> {
     this.modelQuery = modelQuery;
   }
   filter(): this {
-    const excludeFields = ["searchTerm", "limit", "sort", "fields", "page"];
+    const excludeFields = [
+      "searchTerm",
+      "limit",
+      "sort",
+      "fields",
+      "page",
+      "fee",
+      "weight",
+    ];
 
     const filter = { ...this.query }; // copying for safe mutation
     // Removing the fields from filter after splitting.
@@ -18,6 +26,31 @@ export class QueryBuilder<T> {
     this.modelQuery = this.modelQuery.find(filter);
     return this;
   }
+  // filter(): this {
+  //   const excludeFields = ["searchTerm", "limit", "sort", "fields", "page"];
+  //   const filter = { ...this.query };
+
+  //   for (const field of excludeFields) {
+  //     delete filter[field];
+  //   }
+
+  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   const cleanedFilter: Record<string, any> = {};
+  //   for (const [key, value] of Object.entries(filter)) {
+  //     if (value !== undefined && value !== null && value !== "") {
+  //       // Try to intelligently cast numbers
+  //       const num = Number(value);
+  //       if (!isNaN(num) && ["fee", "weight"].includes(key)) {
+  //         cleanedFilter[key] = num;
+  //       } else {
+  //         cleanedFilter[key] = value;
+  //       }
+  //     }
+  //   }
+
+  //   this.modelQuery = this.modelQuery.find(cleanedFilter);
+  //   return this;
+  // }
   search(searchableFields: string[]): this {
     const searchTerm = this.query.searchTerm || "";
     const searchQuery = {
@@ -59,7 +92,7 @@ export class QueryBuilder<T> {
       total: totalDocuments,
       page: page,
       limit: limit,
-      totalPage: Math.ceil(totalDocuments / limit),
+      totalPages: Math.ceil(totalDocuments / limit),
     };
   }
 }

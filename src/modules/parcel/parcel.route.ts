@@ -44,4 +44,10 @@ router.get(
   checkAuth(...Object.values(UserRole)),
   ParcelController.getSingleParcel
 );
+
+router.get(
+  "/get-all",
+  checkAuth(UserRole.ADMIN),
+  ParcelController.getAllParcel
+);
 export const ParcelRoutes = router;
