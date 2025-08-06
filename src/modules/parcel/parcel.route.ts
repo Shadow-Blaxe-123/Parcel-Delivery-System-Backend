@@ -19,4 +19,11 @@ router.delete(
   ParcelController.deleteParcel
 );
 
+// ******************************************* The Updates ******************************************* //
+router.patch(
+  "/update/admin/:id",
+  checkAuth(UserRole.ADMIN),
+  validateRequest(ParcelValidation.updateAdminParcelSchema),
+  ParcelController.updateParcelAdmin
+);
 export const ParcelRoutes = router;

@@ -56,17 +56,21 @@ const deleteParcel = async (id: string) => {
   return null; // or return result if you want to confirm deletion
 };
 
-const admin = async (
-  id: string,
-  payload: Partial<IParcel>,
-  admin: JwtPayload
-) => {
+const admin = async (id: string, payload: JwtPayload, admin: JwtPayload) => {
   const result = await Parcel.findById(id);
   if (!result) {
     throw new AppError(StatusCodes.NOT_FOUND, "Parcel not found");
   }
 
-  const { isBlocked, isDeleted, status, statusLogs } = payload;
+  const { status, statusLog, isBlocked, isDeleted, fee } = payload;
+
+  if (!status) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Status is required");
+  }
+
+  if (!statusLog) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Status log is required");
+  }
 
   if (isBlocked !== undefined) {
     result.isBlocked = isBlocked;
@@ -74,25 +78,37 @@ const admin = async (
   if (isDeleted !== undefined) {
     result.isDeleted = isDeleted;
   }
-  if (status) {
-    result.status = status;
+  if (fee !== undefined) {
+    result.fee = fee;
   }
 
-  if (statusLogs) {
-    const logsArray = Array.isArray(statusLogs) ? statusLogs : [statusLogs];
-    logsArray.forEach((log) => {
-      const logEntry = {
-        ...log,
-        updatedBy: admin._id,
-        timestamp: new Date(),
-        status: status || log.status, // fallback if status not passed in payload
-      };
-      result.statusLogs.push(logEntry);
-    });
-  }
+  // const logsArray = Array.isArray(statusLogs) ? statusLogs : [statusLogs];
+  // logsArray.forEach((log) => {
+  //   const logEntry = {
+  //     ...log,
+  //     updatedBy: admin._id,
+  //     timestamp: new Date(),
+  //     status: status || log.status,
+  //   };
+  //   result.statusLogs.push(logEntry);
+  // });
+
+  const logEntry = {
+    ...statusLog,
+    updatedBy: admin.userId,
+    timestamp: new Date(),
+    status: status,
+  };
+  result.statusLogs.push(logEntry);
+
+  // ✅ Set new status
+  result.status = status;
 
   await result.save();
-  return result;
+  return result.populate(
+    "senderId receiverId statusLogs.updatedBy",
+    "-__v -password -_id -email -createdAt -updatedAt -isDeleted -isBlocked"
+  );
 };
 
 const UpdateParcel = { admin };

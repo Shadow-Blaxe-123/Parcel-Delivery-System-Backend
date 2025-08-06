@@ -4,6 +4,7 @@ import { ParcelServices } from "./parcel.service";
 import AppError from "../../error/AppError";
 import { StatusCodes } from "http-status-codes";
 import sendResponse from "../../utils/sendResponse";
+import { JwtPayload } from "jsonwebtoken";
 
 const createParcel = catchPromise(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -30,6 +31,24 @@ const deleteParcel = catchPromise(async (req: Request, res: Response) => {
     data: parcel,
   });
 });
-// TODO: update parcel admin, check service
+const updateParcelAdmin = catchPromise(async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const payload = req.body;
+  const decodedToken = req.user as JwtPayload;
+  const result = await ParcelServices.UpdateParcel.admin(
+    id,
+    payload,
+    decodedToken
+  );
+  sendResponse(res, {
+    statusCode: StatusCodes.CREATED,
+    message: "Parcel updated successfully",
+    data: result,
+  });
+});
 
-export const ParcelController = { createParcel, deleteParcel };
+export const ParcelController = {
+  createParcel,
+  deleteParcel,
+  updateParcelAdmin,
+};

@@ -19,11 +19,13 @@ export enum ParcelStatus {
   Cancelled = "Cancelled",
 }
 export interface ParcelStatusLog {
-  location: string;
+  // Auto from service layer
   timestamp: Date;
   status: ParcelStatus;
-  notes?: string;
   updatedBy: Types.ObjectId;
+  // Req.body
+  location: string;
+  notes?: string;
 }
 
 export interface IParcel {

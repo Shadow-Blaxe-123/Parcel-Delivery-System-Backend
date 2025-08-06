@@ -1,5 +1,5 @@
 import z from "zod";
-import { ParcelTypes } from "./parcel.interface";
+import { ParcelStatus, ParcelTypes } from "./parcel.interface";
 
 const createParcelSchema = z.object({
   title: z
@@ -14,7 +14,19 @@ const createParcelSchema = z.object({
   fee: z.number("Fee is must be a number"),
   type: z.enum(Object.values(ParcelTypes)),
 });
+const updateAdminParcelSchema = z.object({
+  status: z.enum(Object.values(ParcelStatus)),
+  statusLog: z.object({
+    notes: z.string(),
+    location: z.string(),
+  }),
+  notes: z.string().optional(),
+  fee: z.number("Fee is must be a number").optional(),
+  isBlocked: z.boolean().optional(),
+  isDeleted: z.boolean().optional(),
+});
 
 export const ParcelValidation = {
   createParcelSchema,
+  updateAdminParcelSchema,
 };
