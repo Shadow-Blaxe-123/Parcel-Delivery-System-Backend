@@ -1,11 +1,11 @@
 import crypto from "crypto";
 
-export function generateTrackingId(senderEmail: string): string {
+export function generateTrackingId(email: string): string {
   const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
 
   const hash = crypto
     .createHash("md5")
-    .update(senderEmail.toLowerCase())
+    .update(email.toLowerCase())
     .digest("hex");
 
   // Extract letters only from the hash
