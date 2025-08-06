@@ -8,6 +8,7 @@ const app: Application = express();
 
 // 3rd party middleware
 app.use(express.json());
+app.set("trust proxy", 1);
 app.use(cors());
 app.use(cookieParser());
 
