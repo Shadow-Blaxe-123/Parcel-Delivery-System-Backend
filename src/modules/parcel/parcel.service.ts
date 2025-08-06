@@ -309,7 +309,16 @@ const getAllParcels = async (
   };
 };
 
-const GetParcel = { getSingleParcel, getAllParcels };
+const getAllMeParcels = async (decodedToken: JwtPayload) => {
+  const parcels = await Parcel.find({
+    $or: [{ sender: decodedToken.userId }, { receiver: decodedToken.userId }],
+  })
+    .populate("sender receiver statusLogs.updatedBy", "-__v -password -email")
+    .sort("-createdAt");
+  return parcels;
+};
+
+const GetParcel = { getSingleParcel, getAllParcels, getAllMeParcels };
 const UpdateParcel = { admin, receiver, sender };
 
 export const ParcelServices = {

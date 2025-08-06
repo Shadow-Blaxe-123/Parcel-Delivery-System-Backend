@@ -50,4 +50,9 @@ router.get(
   checkAuth(UserRole.ADMIN),
   ParcelController.getAllParcel
 );
+router.get(
+  "/get-all/me",
+  checkAuth(...Object.values(UserRole)),
+  ParcelController.getAllMeParcel
+);
 export const ParcelRoutes = router;
