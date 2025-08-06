@@ -191,6 +191,74 @@ const receiver = async (
 
   return populated.toObject();
 };
+const sender = async (
+  trackingId: string,
+  payload: JwtPayload,
+  sender: JwtPayload
+) => {
+  const result = await Parcel.findOne({ trackingId });
 
-const UpdateParcel = { admin, receiver };
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Parcel not found");
+  }
+
+  if (result.sender.toString() !== sender.userId) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "You are not authorized to access this parcel!"
+    );
+  }
+
+  const wasDispatched = result.statusLogs.some(
+    (log) => log.status === ParcelStatus.Dispatched
+  );
+
+  if (wasDispatched) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Parcel already dispatched!");
+  }
+
+  // Disallowed fields for sender
+  const blacklistedFields = ["status", "isBlocked", "isDeleted", "statusLogs"];
+  const invalidFields = Object.keys(payload).filter((key) =>
+    blacklistedFields.includes(key)
+  );
+
+  if (invalidFields.length > 0) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `You cannot update these fields: ${invalidFields.join(", ")}`
+    );
+  }
+
+  // Add update log entry
+  const logEntry: ParcelStatusLog = {
+    status: result.status,
+    location: sender.address,
+    timestamp: new Date(),
+    updatedBy: sender.userId,
+    notes: `Sender updated: ${Object.keys(payload).join(", ")}`,
+  };
+
+  result.statusLogs.push(logEntry);
+  await result.save({ validateBeforeSave: true });
+
+  // Apply the updates
+  const updatedParcel = await Parcel.findOneAndUpdate({ trackingId }, payload, {
+    runValidators: true,
+    new: true,
+  });
+
+  if (!updatedParcel) {
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, "Update failed");
+  }
+
+  const populated = await updatedParcel.populate(
+    "sender receiver statusLogs.updatedBy",
+    "-__v -password -email -isDeleted -isBlocked -createdAt -updatedAt"
+  );
+
+  return populated.toObject();
+};
+
+const UpdateParcel = { admin, receiver, sender };
 export const ParcelServices = { createParcel, deleteParcel, UpdateParcel };
