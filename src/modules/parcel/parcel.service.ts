@@ -4,14 +4,17 @@ import { ICreateParcel, IParcel, ParcelStatus } from "./parcel.interface";
 import User from "../user/user.model";
 import { Parcel } from "./parcel.model";
 import { JwtPayload } from "jsonwebtoken";
+import { generateTrackingId } from "../../utils/parcelTrackingId";
 
 const createParcel = async (payload: ICreateParcel, sender: JwtPayload) => {
   const receiver = await User.findOne({ email: payload.receiverEmail });
   if (!receiver) {
     throw new AppError(StatusCodes.NOT_FOUND, "Receiver not found");
   }
-  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
-  const trackingId = `TRK-${datePart}-${sender.userId}`;
+  // const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+  // const trackingId = `TRK-${datePart}-${sender.userId}`;
+
+  const trackingId = generateTrackingId(sender.email);
 
   if (payload.deliveryDate < new Date()) {
     throw new AppError(
